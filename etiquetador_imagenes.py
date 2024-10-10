@@ -41,12 +41,10 @@ from vistas.etiquetador.columna_etiquetador import etiquetador_imagen, crear_bot
 
 
 
-# lista_imagenes = clasificador_imagenes
-
 
 galeria_etiquetador = GaleriaEstados( estilos_galeria )
 
-# imagenes_tags = []
+
 
 
 
@@ -128,13 +126,9 @@ def main(pagina: ft.Page):
     ############## HANDLERS ##################################
 
     def buscar_tags_seleccion(e):
-
+        """Ayuda a buscar etiquetas detectadas en base a la secuencia ingresada en la caja de texto."""
         # texto = e.control.value
         texto = entrada_tags_buscar.value
-        # descarte de entradas vacias
-        # if len(texto) == 0:
-        #     return
-
         # actualizacion de las etiquetas encontradas
         estadisticas()
         filas_filtrado.evento_click(filtrar_todas_etiquetas)
@@ -261,6 +255,11 @@ def main(pagina: ft.Page):
                 print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]no disponible en galeria")
                 clave = clasificador_imagenes.seleccion[0].clave
                 clasificador_imagenes.clave_actual = clave
+
+                # FIX
+                # etiquetas_imagen = clasificador_imagenes.seleccion[0].tags
+                # etiquetador_imagen.agregar_tags(etiquetas_imagen, sobreescribir=True)
+
                 print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]como sustituto\n")
 
 
@@ -277,9 +276,6 @@ def main(pagina: ft.Page):
     def resultado_directorio(e: ft.FilePickerResultEvent):
         """Carga las imagenes del proyecto."""
         if e.path:
-            # acceso a elementos globales
-            # global imagenes_tags
-
             # busqueda 
             clasificador_imagenes.ruta_directorio =  e.path
             directorio = clasificador_imagenes.ruta_directorio
@@ -291,13 +287,8 @@ def main(pagina: ft.Page):
             imagenes_etiquetadas = leer_imagenes_etiquetadas(rutas_imagen)
             clasificador_imagenes.cargar_imagenes(imagenes_etiquetadas)
 
-            # reinicio de las listas de imagenes
-            # imagenes_tags = clasificador_imagenes.todas
-            # clasificador_etiquetas.cargar_imagenes(clasificador_imagenes.todas)
-            # clasificador_imagenes.seleccion = clasificador_imagenes.todas
             clasificador_imagenes.seleccionar_estado(Estados.TODOS.value)
             clasificador_imagenes.filtrar_etiquetas()
-
 
             # asignacion de la primera imagen de la galeria 
             clave = clasificador_imagenes.clave_actual
@@ -347,12 +338,14 @@ def main(pagina: ft.Page):
         # agregado de todas las etiquetas al editor
         crear_botones_etiquetador(dataset)  
 
-        #  Asignacion de eventos de los botones internos
-        etiquetador_imagen.evento_click(
-            funcion_etiquetas   = click_botones_tags,
-            funcion_grupo       = click_botones_etiquetador,
-            funcion_comando     = click_botones_etiquetador
-            )
+
+        # FIX
+        # #  Asignacion de eventos de los botones internos
+        # etiquetador_imagen.evento_click(
+        #     funcion_etiquetas   = click_botones_tags,
+        #     funcion_grupo       = click_botones_etiquetador,
+        #     funcion_comando     = click_botones_etiquetador
+        #     )
 
         # actualizar galeria
         actualizar_estilo_estado( clasificador_imagenes.seleccion, estilos_galeria )
@@ -405,11 +398,6 @@ def main(pagina: ft.Page):
         estadisticas()
         filas_filtrado.evento_click(filtrar_todas_etiquetas)
         columna_etiquetas.update()
-
-        # respaldo para que funcione el filtro de etiquetas
-        # global imagenes_tags
-        # imagenes_tags = clasificador_imagenes.seleccion
-        # clasificador_etiquetas.cargar_imagenes(clasificador_imagenes.seleccion)
 
 
     def guardar_cambios(e:ft.ControlEvent | None = None):
@@ -544,21 +532,23 @@ def main(pagina: ft.Page):
     def filtrar_todas_etiquetas( e: ft.ControlEvent ):
         """Selecciona las imagenes con al menos una de las etiquetas activadas en la pestaña de estadisticas."""
     
-        # global imagenes_tags
+
 
 
         # lectura de tags seleccionados
         set_etiquetas = set()
         tags_conteo = filas_filtrado.leer_botones()
-        # print(len(tags_conteo))
-        for tag in tags_conteo:
-            # extraccion del numero de repeticiones
-            texto = tag.split("(")[0].strip()
-            set_etiquetas.add(texto)
+        # for tag in tags_conteo:
+        #     # extraccion del numero de repeticiones
+        #     texto = tag.split("(")[0].strip()
+        #     set_etiquetas.add(texto)
+
+
+        objeto = map(lambda tag:  tag.split("(")[0].strip(), tags_conteo)
+        set_etiquetas = set(objeto)
 
         nro_etiquetadas   = len(clasificador_imagenes.seleccion)  # FIX
         # filtrado - si no hay etiquetas de entrada devuelve todo
-        # clasificador_imagenes.seleccion = filtrar_etiquetas(imagenes_tags, list(set_etiquetas))
         clasificador_imagenes.filtrar_etiquetas(list(set_etiquetas))
 
         # foco en la galeria
@@ -566,16 +556,13 @@ def main(pagina: ft.Page):
         pestanias.update()
 
         # reporte por snackbar (CORREGIR: es informativo pero molesto)  
-        # nro_etiquetadas   = len(imagenes_tags)
         nro_seleccionadas = len(clasificador_imagenes.seleccion)
         nro_botones = len(filas_filtrado.botones_etiquetas)
         nro_tags    = len(set_etiquetas)
         renglon2 = f"{nro_tags} de {nro_botones} etiquetas seleccionadas;"
         renglon3 = f"{nro_seleccionadas}  de {nro_etiquetadas} imagenes seleccionadas."
         ventana_emergente(pagina, 
-            # f"{renglon1}\n{renglon2}\n{renglon3}")
             f"{renglon2}\n{renglon3}")
-
 
         # actualizacion grafica
         actualizar_componentes() # incluye prevencion de errores por clave inexistente
@@ -720,6 +707,15 @@ def main(pagina: ft.Page):
     pagina.on_keyboard_event = desplazamiento_teclado
 
     pestanias.on_change = cambio_pestanias
+
+
+    #  Asignacion de eventos de los botones internos
+    etiquetador_imagen.evento_click(
+        funcion_etiquetas   = click_botones_tags,
+        funcion_grupo       = click_botones_etiquetador,
+        funcion_comando     = click_botones_etiquetador
+        )
+
 
     # Clase para manejar dialogos de archivo y de carpeta
     dialogo_directorio   .on_result = resultado_directorio 
