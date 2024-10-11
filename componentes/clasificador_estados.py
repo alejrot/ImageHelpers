@@ -119,7 +119,7 @@ def filtrar_dimensiones(
     # )->list[ContenedorEtiquetado]:
     )->list[ContenedorEstados]:
     """Devuelve solamente los contenedores de imagen con el ancho y altura correctos.
-    Si las dimensiones de entrada son 'None' devuelve todos los conteedores de entrada. 
+    Si las dimensiones de entrada son 'None' devuelve todos los contenedores de entrada. 
     """
     imagenes_filtradas = []
 
