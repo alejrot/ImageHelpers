@@ -137,7 +137,7 @@ fila_controles_etiquetas = ft.Row(
 # Fila de botones para abrir carpetas y leer archivos
 fila_controles = ft.Row([
     fila_controles_apertura,
-    fila_controles_dimensiones,
+    # fila_controles_dimensiones,
     fila_controles_etiquetas,
     ayuda_emergente,
     ],

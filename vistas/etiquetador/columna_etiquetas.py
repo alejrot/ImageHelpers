@@ -12,6 +12,10 @@ from vistas.etiquetador.clasificador import clasificador_imagenes
 
 from constantes.colores import LISTA_COLORES_ACTIVO, LISTA_COLORES_PASIVO
 
+from vistas.etiquetador.columna_galeria import galeria_etiquetador
+
+
+
 lista_imagenes = clasificador_imagenes
 
 
@@ -212,7 +216,8 @@ def estadisticas()->dict:
     # descarte de espacios en blanco
     secuencia = secuencia.strip()
 
-    imagenes = lista_imagenes.seleccion
+    # imagenes = lista_imagenes.seleccion
+    imagenes = galeria_etiquetador.imagenes_mostradas
 
     lista_tags = contar_etiquetas_repetidas(imagenes, secuencia)
 

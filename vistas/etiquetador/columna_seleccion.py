@@ -7,8 +7,8 @@ from estilos.estilos_contenedores import estilos_seleccion, estilos_galeria, Est
 
 from componentes.contenedor_etiquetado import ContenedorEtiquetado
 
-from vistas.etiquetador.clasificador import clasificador_imagenes
-
+# from vistas.etiquetador.clasificador import clasificador_imagenes
+from vistas.etiquetador.columna_galeria import galeria_etiquetador
 
 from manejo_texto.procesar_etiquetas import etiquetas2texto
 
@@ -94,11 +94,12 @@ def imagen_seleccion(imagen: ContenedorEtiquetado):
     nombre = pathlib.Path(imagen.ruta).name
     ruta = ruta_relativa_usuario(imagen.ruta)
     # indice = lista_imagenes.seleccion.index(imagen)
-    indice = clasificador_imagenes.seleccion.index(imagen)
+    # indice = clasificador_imagenes.seleccion.index(imagen)
     tags = imagen.tags
     # n = len(lista_imagenes.seleccion)
-    n = len(clasificador_imagenes.seleccion)
-    texto_imagen.value = f"{indice+1}/{n} - '{nombre}'"
+    # n = len(clasificador_imagenes.seleccion)
+    n = len(galeria_etiquetador.imagenes_mostradas)
+    # texto_imagen.value = f"{indice+1}/{n} - '{nombre}'"
     texto_imagen.visible = True 
     texto_imagen.update()
     texto_ruta_titulo.value = f"Ruta archivo:"

@@ -42,6 +42,7 @@ class ContenedorEstados(ABC, ContenedorImagen):
     # clases prediseñadas 
 
     def estilo_estado(self):
+
         if self.defectuosa :     
             estilo = self.estilos[Estilos.ERRONEO.value]     
         elif self.modificada :

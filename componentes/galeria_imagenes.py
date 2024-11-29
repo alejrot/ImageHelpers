@@ -37,6 +37,15 @@ class Galeria(ft.Row):
     #     self.numero = len(rutas_imagen)
     #     self.controls = leer_imagenes( rutas_imagen, ancho, alto, redondeo) 
 
+    def imagen_clave(self, clave: str)->ContImag:
+        """Devuelve el contenedor de la primera imagen con la clave seleccionada. Se presupone que dicha clave existe."""
+        return imagen_clave(clave, self.controls)
+
+
+    def indice_clave(self, clave: str)->int|None:
+        """Devuelve el indice de la primera imagen con la clave seleccionada. Si dicha clave no se encuentra se devuelve 'None'"""
+        return indice_clave(clave, self.controls)
+
 
     def cargar_imagenes(self, imagenes: list[ContImag],  cuadricula=True):
         """Este metodo carga imagenes de tipo ft.Image creadas externamente"""
@@ -68,6 +77,7 @@ class Galeria(ft.Row):
         """Establece el ancho maximo de galeria"""
         self.width = valor
   
+
 
 def rutas_imagenes_picsum(numero: int, dim = 200 ):
     """Funcion auxiliar: busca imagenes online en Picsum.

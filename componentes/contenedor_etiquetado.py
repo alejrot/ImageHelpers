@@ -65,7 +65,7 @@ class ContenedorEtiquetado( Etiquetas, ContenedorEstados):
 
 
 def leer_imagenes_etiquetadas(rutas_imagen: list[str], ancho=1024, alto=1024, redondeo=0, nro_inicial=0):
-    """Esta funcion crea lee imagenes desde archivo y crea una lista de objetos ft.Image.
+    """Esta funcion crea lee imagenes desde archivo y crea una lista de objetos ft.Container modificados.
     También asigna una clave ('key') a cada una.
     """
     contenedores = [] 

@@ -1,6 +1,6 @@
 
 
-
+import sys
 from rich import print as print
 import flet as ft
 import pathlib
@@ -19,7 +19,7 @@ from componentes.galeria_imagenes import Galeria, Contenedor, ContenedorImagen, 
 from componentes.filas_botones import FilasBotonesEtiquetas
 from componentes.lista_desplegable import crear_lista_desplegable,opciones_lista_desplegable, convertir_dimensiones_opencv, extraer_numeros, tupla_resoluciones
 from componentes.contenedor_etiquetado import ContenedorEtiquetado, leer_imagenes_etiquetadas
-from componentes.galeria_estados import GaleriaEstados, actualizar_estilo_estado
+from componentes.galeria_estados import actualizar_estilo_estado
 from componentes.clasificador_estados import filtrar_dimensiones, filtrar_etiquetas
 from componentes.dialogo_alerta import DialogoAlerta
 
@@ -35,20 +35,59 @@ from vistas.etiquetador.columna_seleccion import imagen_seleccion
 from vistas.etiquetador.clasificador import clasificador_imagenes
 from vistas.etiquetador.menu_etiquetador import boton_carpeta, boton_dataset, tooltip_carpeta, ayuda_emergente
 # from vistas.etiquetador.menu_etiquetador import boton_filtrar_dimensiones
-from vistas.etiquetador.menu_etiquetador import fila_controles, lista_dimensiones_desplegable, lista_estados_desplegable
+# from vistas.etiquetador.menu_etiquetador import fila_controles, lista_dimensiones_desplegable, lista_estados_desplegable
+from vistas.etiquetador.menu_etiquetador import fila_controles, lista_estados_desplegable
 from vistas.etiquetador.menu_etiquetador import actualizar_lista_dimensiones
 from vistas.etiquetador.columna_etiquetador import etiquetador_imagen, crear_botones_etiquetador
+from vistas.etiquetador.columna_galeria import galeria_etiquetador
+
+
+
+def claves_etiquetas(
+    lista_imagenes: list[ContenedorEtiquetado], 
+    etiquetas: list[str]  = [],
+    )->list[ContenedorEtiquetado]:
+    """
+    Devuelve las claves de las imagenes que tengan al menos una etiqueta de entrada. 
+    Si no hay etiquetas de entrada se devuelve una lista vacia.
+    """
+    # imagenes_filtradas = []
+    lista_claves = []
+    if etiquetas == []:
+        # imagenes con dimensiones correctas
+        return []
+    else:
+        for etiqueta in etiquetas:
+            for imagen in lista_imagenes:
+                if etiqueta in imagen.tags:
+                    lista_claves.append(imagen.clave)
+
+        # prevención de elementos repetidos
+        return list(set(lista_claves))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 lista_imagenes = clasificador_imagenes
 
 
-galeria_etiquetador = GaleriaEstados( estilos_galeria )
+# galeria_etiquetador = GaleriaEstados( estilos_galeria )
 
 imagenes_tags = []
 
-
+clave_actual = ""
 
 def main(pagina: ft.Page):
 
@@ -229,7 +268,9 @@ def main(pagina: ft.Page):
     def click_botones_etiquetador( e: ft.ControlEvent | None ):
         """Actualiza etiquetas, estado, estadisticas y estilo de bordes de las imagenes en base al boton del etiquetador accionado."""
 
-        clave = lista_imagenes.clave_actual
+        global clave_actual
+
+        clave = clave_actual
 
         ## FIX
         ## BUG: Si la clave no está en la seleccion se produce un cambio de tags descontrolado
@@ -255,9 +296,10 @@ def main(pagina: ft.Page):
             # si dicha clave no se encuentra entonces se elige la primera calve de la lista actual
             else:
                 
+                print(f"[bold green]click_botones_etiquetador")
                 print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]no disponible en galeria")
                 clave = lista_imagenes.seleccion[0].clave
-                lista_imagenes.clave_actual = clave
+                clave_actual = clave
                 print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]como sustituto\n")
 
 
@@ -274,45 +316,41 @@ def main(pagina: ft.Page):
     def resultado_directorio(e: ft.FilePickerResultEvent):
         """Carga las imagenes del proyecto."""
         if e.path:
+            directorio = e.path
+
+
             # acceso a elementos globales
-            global imagenes_tags
+            # global imagenes_tags
 
             # busqueda 
-            lista_imagenes.ruta_directorio =  e.path
-            directorio = lista_imagenes.ruta_directorio
-
+            directorio = e.path
+            # print(directorio)
             ventana_emergente(pagina, f"Buscando imágenes...\nRuta: {directorio} ")
             rutas_imagen = buscar_imagenes(directorio)
         
             # lectura de imagenes del directorio
             imagenes_etiquetadas = leer_imagenes_etiquetadas(rutas_imagen)
-            lista_imagenes.cargar_imagenes(imagenes_etiquetadas)
+            # lista_imagenes.cargar_imagenes(imagenes_etiquetadas)
+            galeria_etiquetador.cargar_imagenes(imagenes_etiquetadas)
+            galeria_etiquetador.claves_mostradas = None
 
-            # reinicio de las listas de imagenes
-            imagenes_tags = lista_imagenes.todas
-            lista_imagenes.seleccion = lista_imagenes.todas
+            galeria_etiquetador.update()
+            # print(galeria_etiquetador.claves_mostradas)
+           
 
             # asignacion de la primera imagen de la galeria 
-            clave = lista_imagenes.clave_actual
-            if len(lista_imagenes.seleccion)>0:         
-                clave = lista_imagenes.seleccion[0].clave
-                etiquetador_imagen.setear_salida(lista_imagenes.seleccion[0]) # Previene falsas modificaciones al cambiar de carpeta
+            if len(imagenes_etiquetadas)>0:         
+                # clave = galeria_etiquetador.imagenes[0].clave
+                etiquetador_imagen.setear_salida(imagenes_etiquetadas[0]) # Previene falsas modificaciones al cambiar de carpeta
+                etiquetador_imagen.update()
                 # reporte por snackbar
-                ventana_emergente(pagina, f"Directorio de imagenes abierto.\nRuta: {directorio} \nNº imágenes: {len(lista_imagenes.seleccion)}")
+                ventana_emergente(pagina, f"Directorio de imagenes abierto.\nRuta: {directorio} \nNº imágenes: {len(imagenes_etiquetadas)}")
  
             else:
-                clave = ""
                 # reporte por snackbar
                 ventana_emergente(pagina, f"Directorio de imagenes vacío.\nRuta: {directorio} ")
 
 
-            lista_imagenes.clave_actual = clave
-            # se descartan los tamaños de imagen no disponibles
-            actualizar_lista_dimensiones() 
-            lista_dimensiones_desplegable.update()
-            # relectura del archivo dataset (puede no existir)
-            dataset.ruta = lista_imagenes.ruta_dataset
-            dataset.leer_archivo()
             # actualizacion de la app
             cargar_galeria_componentes()
 
@@ -348,7 +386,8 @@ def main(pagina: ft.Page):
             )
 
         # actualizar galeria
-        actualizar_estilo_estado( lista_imagenes.seleccion, estilos_galeria )
+        galeria_etiquetador.estilo_estados()
+        # actualizar_estilo_estado( lista_imagenes.seleccion, estilos_galeria )
 
         # actualizacion grafica
         actualizar_componentes()
@@ -360,7 +399,8 @@ def main(pagina: ft.Page):
         
         # print("click_imagen_galeria")
         contenedor = e.control
-        lista_imagenes.clave_actual = contenedor.clave
+        global clave_actual
+        clave_actual = contenedor.clave
         # asigna imagen y estilo de bordes a la pestaña de etiquetado
         actualizar_componentes()
         #cambio de pestaña
@@ -382,18 +422,24 @@ def main(pagina: ft.Page):
         """Selecciona solamente aquellas imagenes que cumplan con el tamaño y estado especificados."""
 
         # conversion de texto a tupla numerica de dimensiones de imagen elegida
-        opcion = lista_dimensiones_desplegable.value
-        dimensiones_elegidas = convertir_dimensiones_opencv(str(opcion))
+        # opcion = lista_dimensiones_desplegable.value
+        # dimensiones_elegidas = convertir_dimensiones_opencv(str(opcion))
 
-        lista_imagenes.dimensiones_elegidas = dimensiones_elegidas
+        # lista_imagenes.dimensiones_elegidas = dimensiones_elegidas
 
         # Filtrado en base a los estados de las imagenes
         estado = lista_estados_desplegable.value
-        lista_imagenes.seleccionar_estado( estado )
+
+        claves = galeria_etiquetador.claves_estado(estado)
+        # print(f"claves: {claves}")
+        galeria_etiquetador.claves_mostradas = claves
+
 
         # reporte por snackbar 
-        if len(lista_imagenes.todas) > 0 and estado != None:
-            ventana_emergente(pagina, f"Filtrado por dimensiones y estado - {len(lista_imagenes.seleccion)} imagenes seleccionadas.")
+        if claves!= None and estado != None:
+            ventana_emergente(pagina, f"Filtrado por estado - {len(claves)} imagenes seleccionadas.")
+
+
         # actualizacion de las etiquetas encontradas
         estadisticas()
         filas_filtrado.evento_click(filtrar_todas_etiquetas)
@@ -494,26 +540,34 @@ def main(pagina: ft.Page):
         Tambien carga las imagenes disponibles a la galeria gráfica.
         Si la galeria queda vacia se ocultan los componentes graficos.
         """
-        clave = lista_imagenes.clave_actual
+        # clave = lista_imagenes.clave_actual
+
+        global clave_actual
+
         # actualizar galeria
-        galeria_etiquetador.cargar_imagenes( lista_imagenes.seleccion )
-        galeria_etiquetador.eventos(click = click_imagen_galeria)
+        # galeria_etiquetador.cargar_imagenes( lista_imagenes.seleccion )
+        # galeria_etiquetador.eventos(click = click_imagen_galeria)
         galeria_etiquetador.update()
 
-        if len(lista_imagenes.seleccion)>0:
+        # claves_mostradas = galeria_etiquetador.claves_mostradas
+
+        # if len(claves_mostradas)>0:
+        if len(galeria_etiquetador.imagenes_mostradas)>0:
             # busqueda imagen
-            indice = indice_clave(clave, lista_imagenes.seleccion)
+            # indice = indice_clave(clave, lista_imagenes.seleccion)
+            indice = galeria_etiquetador.indice_clave(clave_actual)
             # si la clave actual no se encuentra se toma la primera imagen disponible
             if indice == None:
-
-                print(f"[bold magenta]Imagen '[bold yellow]{clave}' [bold magenta]no disponible en galeria")
-                clave = lista_imagenes.seleccion[0].clave
-                lista_imagenes.clave_actual = clave
-                print(f"[bold magenta]Imagen '[bold yellow]{clave}' [bold magenta]como sustituto\n")
+                print(f"[bold magenta]actualizar_componentes")
+                print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]no disponible en galeria")
+                # clave_actual = galeria_etiquetador.imagenes_mostradas[0].clave
+                clave_actual = galeria_etiquetador.controls[0].clave
+                print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]como sustituto\n")
 
 
             # seleccion imagen
-            imagen_elegida = imagen_clave(clave, lista_imagenes.seleccion)
+            # imagen_elegida = imagen_clave(clave, lista_imagenes.seleccion)
+            imagen_elegida = galeria_etiquetador.imagen_clave(clave_actual)
 
             etiquetador_imagen.setear_salida(imagen_elegida) # original
             imagen_seleccion(imagen_elegida)
@@ -525,8 +579,8 @@ def main(pagina: ft.Page):
 
         else:
             # ocultamiento de componentes graficos
-            columna_etiquetas.visible = True
-            columna_etiquetas.update()
+            # columna_etiquetas.visible = True
+            # columna_etiquetas.update()
             columna_seleccion.visible = True
             columna_seleccion.update()
             etiquetador_imagen.habilitado = False
@@ -549,6 +603,15 @@ def main(pagina: ft.Page):
 
         # filtrado - si no hay etiquetas de entrada devuelve todo
         lista_imagenes.seleccion = filtrar_etiquetas(imagenes_tags, list(set_etiquetas))
+
+
+
+        claves = claves_etiquetas(imagenes_tags, list(set_etiquetas))
+        # print(claves)
+        galeria_etiquetador.claves_mostradas = None
+        galeria_etiquetador.update()
+        # time.sleep(3)
+
 
         # foco en la galeria
         pestanias.selected_index = Tab.TAB_GALERIA.value
@@ -697,7 +760,7 @@ def main(pagina: ft.Page):
     pagina.window_prevent_close = True
     pagina.on_window_event = confirmar_cierre_programa
 
-    lista_dimensiones_desplegable.on_change = cargar_galeria_componentes    
+    # lista_dimensiones_desplegable.on_change = cargar_galeria_componentes    
     lista_estados_desplegable.on_change = cargar_galeria_componentes     
     boton_reset_tags.on_click = reset_tags_filtros
     
@@ -750,6 +813,16 @@ def main(pagina: ft.Page):
     pagina.update()
     
 
+    if len(sys.argv)>1:
+        directorio = sys.argv[1]
+        print(directorio)
+        # resultado_directorio()
+
+
+
+
 
 if __name__ == "__main__":
+
+
     ft.app(target=main)
