@@ -96,6 +96,8 @@ def main(pagina: ft.Page):
 
     tags_teclado = Etiquetas("") 
 
+    directorio_terminal = ""
+
     ############# COMPONENTES GRAFICOS ######################## 
 
     boton_guardar = ft.FloatingActionButton(
@@ -313,46 +315,49 @@ def main(pagina: ft.Page):
    
 
     # Funcion de apertura de directorio
-    def resultado_directorio(e: ft.FilePickerResultEvent):
+    def resultado_directorio(e: ft.FilePickerResultEvent|None = None):
         """Carga las imagenes del proyecto."""
-        if e.path:
+        if e != None:
             directorio = e.path
 
+        else:
+            directorio = str(pathlib.Path(directorio_terminal).absolute())
+            print(directorio)
 
-            # acceso a elementos globales
-            # global imagenes_tags
+        # acceso a elementos globales
+        # global imagenes_tags
 
-            # busqueda 
-            directorio = e.path
-            # print(directorio)
-            ventana_emergente(pagina, f"Buscando imágenes...\nRuta: {directorio} ")
-            rutas_imagen = buscar_imagenes(directorio)
-        
-            # lectura de imagenes del directorio
-            imagenes_etiquetadas = leer_imagenes_etiquetadas(rutas_imagen)
-            # lista_imagenes.cargar_imagenes(imagenes_etiquetadas)
-            galeria_etiquetador.cargar_imagenes(imagenes_etiquetadas)
-            galeria_etiquetador.claves_mostradas = None
+        # busqueda 
+        # directorio = e.path
+        # print(directorio)
+        ventana_emergente(pagina, f"Buscando imágenes...\nRuta: {directorio} ")
+        rutas_imagen = buscar_imagenes(directorio)
+    
+        # lectura de imagenes del directorio
+        imagenes_etiquetadas = leer_imagenes_etiquetadas(rutas_imagen)
+        # lista_imagenes.cargar_imagenes(imagenes_etiquetadas)
+        galeria_etiquetador.cargar_imagenes(imagenes_etiquetadas)
+        galeria_etiquetador.claves_mostradas = None
 
-            galeria_etiquetador.update()
-            # print(galeria_etiquetador.claves_mostradas)
-           
+        galeria_etiquetador.update()
+        # print(galeria_etiquetador.claves_mostradas)
+    
 
-            # asignacion de la primera imagen de la galeria 
-            if len(imagenes_etiquetadas)>0:         
-                # clave = galeria_etiquetador.imagenes[0].clave
-                etiquetador_imagen.setear_salida(imagenes_etiquetadas[0]) # Previene falsas modificaciones al cambiar de carpeta
-                etiquetador_imagen.update()
-                # reporte por snackbar
-                ventana_emergente(pagina, f"Directorio de imagenes abierto.\nRuta: {directorio} \nNº imágenes: {len(imagenes_etiquetadas)}")
- 
-            else:
-                # reporte por snackbar
-                ventana_emergente(pagina, f"Directorio de imagenes vacío.\nRuta: {directorio} ")
+        # asignacion de la primera imagen de la galeria 
+        if len(imagenes_etiquetadas)>0:         
+            # clave = galeria_etiquetador.imagenes[0].clave
+            etiquetador_imagen.setear_salida(imagenes_etiquetadas[0]) # Previene falsas modificaciones al cambiar de carpeta
+            etiquetador_imagen.update()
+            # reporte por snackbar
+            ventana_emergente(pagina, f"Directorio de imagenes abierto.\nRuta: {directorio} \nNº imágenes: {len(imagenes_etiquetadas)}")
+
+        else:
+            # reporte por snackbar
+            ventana_emergente(pagina, f"Directorio de imagenes vacío.\nRuta: {directorio} ")
 
 
-            # actualizacion de la app
-            cargar_galeria_componentes()
+        # actualizacion de la app
+        cargar_galeria_componentes()
 
 
     # Funcion de apertura de archivo con etiquetas (dataset)
@@ -374,7 +379,7 @@ def main(pagina: ft.Page):
         """Muestra las imagenes encontradas y las asigna a los componentes de seleccion y etiquetado. Si no hay imágenes que mostra oculta y/o inhabilita componentes."""
     
         # si se encuentran imagenes se visibilizan y configuran los controles
-        filtrar_dimensiones_estados()   
+        filtrar_estados()   
         # agregado de todas las etiquetas al editor
         crear_botones_etiquetador(dataset)  
 
@@ -387,7 +392,6 @@ def main(pagina: ft.Page):
 
         # actualizar galeria
         galeria_etiquetador.estilo_estados()
-        # actualizar_estilo_estado( lista_imagenes.seleccion, estilos_galeria )
 
         # actualizacion grafica
         actualizar_componentes()
@@ -418,36 +422,23 @@ def main(pagina: ft.Page):
         pagina.update()
 
 
-    def filtrar_dimensiones_estados( e: ft.ControlEvent | None = None):
-        """Selecciona solamente aquellas imagenes que cumplan con el tamaño y estado especificados."""
-
-        # conversion de texto a tupla numerica de dimensiones de imagen elegida
-        # opcion = lista_dimensiones_desplegable.value
-        # dimensiones_elegidas = convertir_dimensiones_opencv(str(opcion))
-
-        # lista_imagenes.dimensiones_elegidas = dimensiones_elegidas
+    def filtrar_estados( e: ft.ControlEvent | None = None):
+        """Selecciona solamente aquellas imagenes que cumplan con el estado especificado."""
 
         # Filtrado en base a los estados de las imagenes
         estado = lista_estados_desplegable.value
 
         claves = galeria_etiquetador.claves_estado(estado)
-        # print(f"claves: {claves}")
         galeria_etiquetador.claves_mostradas = claves
-
 
         # reporte por snackbar 
         if claves!= None and estado != None:
             ventana_emergente(pagina, f"Filtrado por estado - {len(claves)} imagenes seleccionadas.")
 
-
         # actualizacion de las etiquetas encontradas
         estadisticas()
         filas_filtrado.evento_click(filtrar_todas_etiquetas)
         columna_etiquetas.update()
-
-        # respaldo para que funcione el filtro de etiquetas
-        global imagenes_tags
-        imagenes_tags = lista_imagenes.seleccion
 
 
     def guardar_cambios(e:ft.ControlEvent | None = None):
@@ -476,9 +467,6 @@ def main(pagina: ft.Page):
         entrada_tags_quitar.update()
         entrada_tags_agregar.value = ""
         entrada_tags_agregar.update()
-
-
-
 
 
     def abrir_dialogo_guardado(e:ft.ControlEvent | None = None):
@@ -546,7 +534,7 @@ def main(pagina: ft.Page):
 
         # actualizar galeria
         # galeria_etiquetador.cargar_imagenes( lista_imagenes.seleccion )
-        # galeria_etiquetador.eventos(click = click_imagen_galeria)
+        galeria_etiquetador.eventos(click = click_imagen_galeria)
         galeria_etiquetador.update()
 
         # claves_mostradas = galeria_etiquetador.claves_mostradas
@@ -794,9 +782,9 @@ def main(pagina: ft.Page):
     
 
     if len(sys.argv)>1:
-        directorio = sys.argv[1]
-        print(directorio)
-        # resultado_directorio()
+        directorio_terminal = sys.argv[1]
+        print(directorio_terminal)
+        resultado_directorio()
 
 
 
