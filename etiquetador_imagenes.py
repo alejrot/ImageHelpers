@@ -525,18 +525,24 @@ def main(pagina: ft.Page):
         galeria_etiquetador.update()
 
         # claves_mostradas = galeria_etiquetador.claves_mostradas
+        imagenes_mostradas = galeria_etiquetador.imagenes_mostradas
 
         # if len(claves_mostradas)>0:
-        if len(galeria_etiquetador.imagenes_mostradas)>0:
+        if len(imagenes_mostradas)>0:
             # busqueda imagen
             # indice = indice_clave(clave, lista_imagenes.seleccion)
-            indice = galeria_etiquetador.indice_clave(clave_actual)
+            # indice = galeria_etiquetador.indice_clave(clave_actual)
+            indice = indice_clave(clave_actual, imagenes_mostradas)
+
+
+
             # si la clave actual no se encuentra se toma la primera imagen disponible
             if indice == None:
                 print(f"[bold magenta]actualizar_componentes")
                 print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]no disponible en galeria")
                 # clave_actual = galeria_etiquetador.imagenes_mostradas[0].clave
-                clave_actual = galeria_etiquetador.controls[0].clave
+                # clave_actual = galeria_etiquetador.controls[0].clave
+                clave_actual = imagenes_mostradas[0].clave
                 print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]como sustituto\n")
 
 
@@ -593,15 +599,20 @@ def main(pagina: ft.Page):
         """Permite el desplazamiento rapido de imagenes con teclas del teclado predefinidas"""
         tecla = e.key   
 
-        numero_imagenes = len(lista_imagenes.seleccion)
+
+        global clave_actual
+
+
+        imagenes_mostradas = galeria_etiquetador.imagenes_mostradas
+        numero_imagenes = len(imagenes_mostradas)
         if numero_imagenes > 0:
             # prevencion de errores por posible clave inexistente
-            indice = indice_clave(lista_imagenes.clave_actual, lista_imagenes.seleccion)
+            indice = indice_clave(lista_imagenes.clave_actual, imagenes_mostradas)
             if indice == None:
-                lista_imagenes.clave_actual = lista_imagenes.seleccion[0].clave
+                clave_actual = imagenes_mostradas[0].clave
 
-            imagen = imagen_clave(lista_imagenes.clave_actual, lista_imagenes.seleccion)
-            indice = lista_imagenes.seleccion.index(imagen)
+            imagen = imagen_clave(clave_actual, imagenes_mostradas)
+            indice = imagenes_mostradas.index(imagen)
             # cambio de imagen seleccionada
             cambiar_imagen = False
             # avanzar
@@ -632,8 +643,12 @@ def main(pagina: ft.Page):
             if cambiar_imagen:
                 imagen: ContenedorEtiquetado
                 # actualizacion de parametros
-                imagen = lista_imagenes.seleccion[indice]
-                lista_imagenes.clave_actual= imagen.clave 
+                # imagen = lista_imagenes.seleccion[indice]
+                lista_imagenes.clave_actual= imagen.clave
+
+                imagen = imagenes_mostradas[indice]
+                clave_actual = imagen.clave
+
                 # carga de imagen
                 actualizar_componentes()
                 apuntar_galeria(lista_imagenes.clave_actual)
