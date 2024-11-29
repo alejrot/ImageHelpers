@@ -272,38 +272,16 @@ def main(pagina: ft.Page):
 
         global clave_actual
 
-        clave = clave_actual
 
-        ## FIX
-        ## BUG: Si la clave no está en la seleccion se produce un cambio de tags descontrolado
+        imagen_seleccionada = imagen_clave(clave_actual, galeria_etiquetador.controls) 
 
-        if len(lista_imagenes.seleccion)>0:
-            # prevencion de errores por posible clave inexistente
-            # (suele pasar al cambiar las condiciones de filtrado de imagenes)
+        # Se transfieren los tags de la botonera a las imagenes 
+        etiquetas_botones = etiquetador_imagen.leer_botones()
+        imagen_seleccionada.agregar_tags(etiquetas_botones, sobreescribir=True)
 
-            indice = indice_clave(clave, lista_imagenes.seleccion)
-            # si la clave actual existe se transfiere la informacion de la botonera la imagen
-            if indice != None:
-                imagen_seleccionada = imagen_clave(clave, lista_imagenes.seleccion) 
-
-                # Se transfieren los tags de la botonera a las imagenes 
-                etiquetas_botones = etiquetador_imagen.leer_botones()
-                imagen_seleccionada.agregar_tags(etiquetas_botones, sobreescribir=True)
-
-                # actualizacion bordes galeria
-                imagen_seleccionada.verificar_imagen(lista_imagenes.dimensiones_elegidas)
-                imagen_seleccionada.verificar_guardado()
-                imagen_seleccionada.estilo_estado()
-
-            # si dicha clave no se encuentra entonces se elige la primera calve de la lista actual
-            else:
-                
-                print(f"[bold green]click_botones_etiquetador")
-                print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]no disponible en galeria")
-                clave = lista_imagenes.seleccion[0].clave
-                clave_actual = clave
-                print(f"[bold green]Imagen '[bold yellow]{clave}' [bold green]como sustituto\n")
-
+        # actualizacion bordes galeria
+        imagen_seleccionada.verificar_guardado()
+        imagen_seleccionada.estilo_estado()
 
         # actualizacion grafica de todos los componentes
         actualizar_componentes() 
@@ -322,14 +300,8 @@ def main(pagina: ft.Page):
 
         else:
             directorio = str(pathlib.Path(directorio_terminal).absolute())
-            print(directorio)
-
-        # acceso a elementos globales
-        # global imagenes_tags
 
         # busqueda 
-        # directorio = e.path
-        # print(directorio)
         ventana_emergente(pagina, f"Buscando imágenes...\nRuta: {directorio} ")
         rutas_imagen = buscar_imagenes(directorio)
     
@@ -582,7 +554,7 @@ def main(pagina: ft.Page):
         # lectura de tags seleccionados
         set_etiquetas = set()
         tags_conteo = filas_filtrado.leer_botones()
-        # print(len(tags_conteo))
+  
         for tag in tags_conteo:
             # extraccion del numero de repeticiones
             texto = tag.split("(")[0].strip()
@@ -783,7 +755,7 @@ def main(pagina: ft.Page):
 
     if len(sys.argv)>1:
         directorio_terminal = sys.argv[1]
-        print(directorio_terminal)
+        print(f"[bold green]Ruta ingresada por shell: [bold yellow]{directorio_terminal}")
         resultado_directorio()
 
 
