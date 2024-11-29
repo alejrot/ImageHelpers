@@ -42,6 +42,20 @@ class Galeria(ft.Row):
         return imagen_clave(clave, self.controls)
 
 
+    def imagenes_claves(self, claves: list|None):
+        """Devuelve todas las imagenes con las claves pedidas."""
+
+        if claves==None or claves==[]:
+            return []
+
+        imagenes = []
+        for clave in claves: 
+            img = self.imagen_clave(clave)
+            imagenes.append(img)
+
+        return imagenes
+
+
     def indice_clave(self, clave: str)->int|None:
         """Devuelve el indice de la primera imagen con la clave seleccionada. Si dicha clave no se encuentra se devuelve 'None'"""
         return indice_clave(clave, self.controls)

@@ -416,16 +416,29 @@ def main(pagina: ft.Page):
     def guardar_cambios(e:ft.ControlEvent | None = None):
         """Guarda las etiquetas en archivo de todas las imagenes modificadas. También actualiza estados y graficas."""
 
-        if len(lista_imagenes.seleccion) == 0 : 
-            ventana_emergente(pagina,f"Galería vacía - sin cambios")
+
+        claves_modificadas = galeria_etiquetador.claves_estado(Estados.MODIFICADO.value)
+
+        if claves_modificadas == None : 
+            # ventana_emergente(pagina,f"Galería sin cambios")
+            print("[bold red]funcion 'guardar_cambios'")
+            print("[bold red]ERROR: claves: None")
             return
+
+        if len(claves_modificadas) == 0 : 
+            ventana_emergente(pagina,f"Galería sin cambios")
+            return
+
+        imagenes_modificadas = galeria_etiquetador.imagenes_claves(claves_modificadas)
+
+
         imagen: ContenedorEtiquetado
         i = 0
-        for imagen in lista_imagenes.seleccion:  #
+        for imagen in imagenes_modificadas:  
             guardado = imagen.guardar_archivo()
             if guardado :
                 i += 1 
-        for imagen in lista_imagenes.seleccion:
+        for imagen in imagenes_modificadas:
             imagen.verificar_guardado()
         # reporte por snackbar
         if i == 0:
@@ -433,7 +446,8 @@ def main(pagina: ft.Page):
         else:
             ventana_emergente(pagina,f"¡Etiquetas guardadas! - {i} archivos modificados")
         # actualizacion grafica
-        actualizar_componentes(e)    
+        # actualizar_componentes(e)    
+        cargar_galeria_componentes()
 
         entrada_tags_quitar.value = ""
         entrada_tags_quitar.update()
@@ -444,8 +458,7 @@ def main(pagina: ft.Page):
     def abrir_dialogo_guardado(e:ft.ControlEvent | None = None):
 
         # conteo imagenes con cambios sin guardar
-        lista_imagenes.clasificar_estados()
-        j = len(lista_imagenes.modificadas) 
+        j = len(galeria_etiquetador.claves_estado(Estados.MODIFICADO.value))
 
         # si no hay modificaciones realizadas se cierra la alerta    
         if j == 0:
@@ -468,21 +481,23 @@ def main(pagina: ft.Page):
 
         if e.data == "close":
             # conteo imagenes con cambios sin guardar
-            lista_imagenes.clasificar_estados()
-            j = len(lista_imagenes.modificadas) 
+            modificadas = galeria_etiquetador.claves_estado(Estados.MODIFICADO.value)
+            if modificadas == None:
+                pagina.window_destroy()
+
             # si no hay modificaciones realizadas se cierra el programa
-            if j==0:
+            j = len(modificadas)
+            if j == 0:
                 pagina.window_destroy()
             # en caso contrario se lanza la alerta de cierre
-            else:
-                dialogo_cierre_programa = DialogoAlerta(
-                    pagina,
-                    "¿Descartar cambios?", 
-                    f"Hay {j} modificaciones sin guardar."
-                    )
+            dialogo_cierre_programa = DialogoAlerta(
+                pagina,
+                "¿Descartar cambios?", 
+                f"Hay {j} modificaciones sin guardar."
+                )
 
-                dialogo_cierre_programa.funcion_confirmacion = pagina.window_destroy
-                dialogo_cierre_programa.abrir_alerta()
+            dialogo_cierre_programa.funcion_confirmacion = pagina.window_destroy
+            dialogo_cierre_programa.abrir_alerta()
 
 
 
