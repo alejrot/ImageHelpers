@@ -45,17 +45,17 @@ from vistas.etiquetador.columna_galeria import galeria_etiquetador
 
 def claves_etiquetas(
     lista_imagenes: list[ContenedorEtiquetado], 
-    etiquetas: list[str]  = [],
-    )->list[ContenedorEtiquetado]:
+    etiquetas: list[str] | None = None,
+    )->list[ContenedorEtiquetado]|None:
     """
     Devuelve las claves de las imagenes que tengan al menos una etiqueta de entrada. 
-    Si no hay etiquetas de entrada se devuelve una lista vacia.
+    Si no hay etiquetas de entrada se devuelve 'None'.
     """
     # imagenes_filtradas = []
     lista_claves = []
     if etiquetas == []:
         # imagenes con dimensiones correctas
-        return []
+        return None
     else:
         for etiqueta in etiquetas:
             for imagen in lista_imagenes:
@@ -590,7 +590,6 @@ def main(pagina: ft.Page):
     def filtrar_todas_etiquetas( e: ft.ControlEvent ):
         """Selecciona las imagenes con al menos una de las etiquetas activadas en la pestaña de estadisticas."""
     
-        global imagenes_tags
 
         # lectura de tags seleccionados
         set_etiquetas = set()
@@ -602,32 +601,13 @@ def main(pagina: ft.Page):
             set_etiquetas.add(texto)
 
         # filtrado - si no hay etiquetas de entrada devuelve todo
-        lista_imagenes.seleccion = filtrar_etiquetas(imagenes_tags, list(set_etiquetas))
-
-
-
-        claves = claves_etiquetas(imagenes_tags, list(set_etiquetas))
-        # print(claves)
-        galeria_etiquetador.claves_mostradas = None
+        claves_seleccion = claves_etiquetas(galeria_etiquetador.controls, list(set_etiquetas))
+        galeria_etiquetador.claves_mostradas = claves_seleccion
         galeria_etiquetador.update()
-        # time.sleep(3)
-
 
         # foco en la galeria
         pestanias.selected_index = Tab.TAB_GALERIA.value
         pestanias.update()
-
-        # reporte por snackbar (CORREGIR: es informativo pero molesto)  
-        nro_etiquetadas   = len(imagenes_tags)
-        nro_seleccionadas = len(lista_imagenes.seleccion)
-        nro_botones = len(filas_filtrado.botones_etiquetas)
-        nro_tags    = len(set_etiquetas)
-        renglon2 = f"{nro_tags} de {nro_botones} etiquetas seleccionadas;"
-        renglon3 = f"{nro_seleccionadas}  de {nro_etiquetadas} imagenes seleccionadas."
-        ventana_emergente(pagina, 
-            # f"{renglon1}\n{renglon2}\n{renglon3}")
-            f"{renglon2}\n{renglon3}")
-
 
         # actualizacion grafica
         actualizar_componentes() # incluye prevencion de errores por clave inexistente
