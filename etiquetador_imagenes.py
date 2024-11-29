@@ -67,7 +67,7 @@ lista_imagenes = clasificador_imagenes
 
 imagenes_tags = []
 
-clave_actual = ""
+# clave_actual = ""
 
 def main(pagina: ft.Page):
 
@@ -241,7 +241,7 @@ def main(pagina: ft.Page):
     def click_botones_etiquetador( e: ft.ControlEvent | None ):
         """Actualiza etiquetas, estado, estadisticas y estilo de bordes de las imagenes en base al boton del etiquetador accionado."""
 
-        global clave_actual
+        clave_actual = galeria_etiquetador.claves_actuales[0]
 
         imagen_seleccionada = imagen_clave(clave_actual, galeria_etiquetador.controls) 
 
@@ -340,8 +340,8 @@ def main(pagina: ft.Page):
         """Este handler permite elegir una imagen desde la galeria y pasarla al selector de imagenes al tiempo que carga las etiquetas de archivo."""
 
         contenedor = e.control
-        global clave_actual
-        clave_actual = contenedor.clave
+
+        galeria_etiquetador.claves_actuales[0] = contenedor.clave
         # asigna imagen y estilo de bordes a la pestaña de etiquetado
         actualizar_componentes()
         #cambio de pestaña
@@ -477,7 +477,8 @@ def main(pagina: ft.Page):
         Tambien carga las imagenes disponibles a la galeria gráfica.
         Si la galeria queda vacia se ocultan los componentes graficos.
         """
-        global clave_actual
+
+        clave_actual =  galeria_etiquetador.claves_actuales[0] 
 
         # actualizar galeria
         galeria_etiquetador.eventos(click = click_imagen_galeria)
@@ -543,7 +544,7 @@ def main(pagina: ft.Page):
         """Permite el desplazamiento rapido de imagenes con teclas del teclado predefinidas"""
         tecla = e.key   
 
-        global clave_actual
+        clave_actual = galeria_etiquetador.claves_actuales[0] 
 
         imagenes_mostradas = galeria_etiquetador.imagenes_mostradas
         numero_imagenes = len(imagenes_mostradas)
@@ -587,6 +588,8 @@ def main(pagina: ft.Page):
                 # actualizacion de imagen seelccionada
                 imagen = imagenes_mostradas[indice]
                 clave_actual = imagen.clave
+
+                galeria_etiquetador.claves_actuales[0] = clave_actual 
 
                 # carga de imagen
                 actualizar_componentes()

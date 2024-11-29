@@ -20,6 +20,8 @@ class GaleriaEstados(Galeria):
         self.estilos = estilos
         # lista auxiliar para seleccionar contenedores internos a mostrar
         self.__claves_mostradas :list|None = None
+        # lista auxiliar para seleccionar contenedores internos a mostrar
+        self.claves_actuales :list = [""]
 
     def cargar_imagenes(self, 
         imagenes: list[ContImag ], 
