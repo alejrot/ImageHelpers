@@ -9,7 +9,6 @@ def nada( e ):
 
 
 
-
 class FilasBotonesEtiquetas(ft.Column):
     """Este componente crea botones de activacion para cada etiqueta (descripcion) detectada en un archivo de texto"""
     def __init__(self):
@@ -63,47 +62,80 @@ class FilasBotonesEtiquetas(ft.Column):
         """
         self.dataset = dataset
         tags = self.dataset.tags
-        grupo = self.dataset.grupos
         data = self.dataset.datos
+        grupos = list(set(self.dataset.grupos))
+
         # conteo grupos de etiquetas
-        grupos = list(set(grupo))
         self.__numero_grupos = len(grupos)
         self.__numero_colores = len(self.lista_colores_activo)  
+
+        # ordenamiento de los tags en filas por grupo
+        tags_grupo = dict()
+        # inicializacion
+        for grupo in grupos:
+            tags_grupo[grupo] = []
+        for tag in tags:
+            # todos los grupos donde está el tag actual
+            grupos_tag = data[tag]
+            # un mismo tag puede aparecer en varias filas
+            for grupo in grupos_tag:
+                tags_grupo[grupo].append(tag)
+                
+
         # maquetado
         self.__filas_botones = []
-        self.botones_grupo = []
-        for i in range(self.__numero_grupos):
-            g = BotonGrupo()
-            g.data = i          # indice grupo
-            g.on_click = self.conmutar_grupo    # evento
-            g.visible = botones_grupo_visibles
-            # lista para acceso
-            self.botones_grupo.append(g)
-            # colocacion al comienzo de cada fila de botones
-            self.__filas_botones.append( ft.Row(
-                controls = [g],
-                wrap = True,
-                ))  
-        # lista completa de botones
-        self.botones_etiquetas = []
-        # crear botones y repartirlos
-        for tag in tags:
-            # reparto grafico de botones
-            grupos_tag = data[tag]
-            for grupo in grupos_tag:
-                # creacion de boton (puede estar repetido)
-                b = BotonBiestable(tag)
-                self.botones_etiquetas.append(b)
-                self.__filas_botones[grupo].controls.append(b)
-                # asignacion color
-                b.color_false = self.lista_colores_pasivo[grupo % self.__numero_colores ]
-                # b.color_false = ft.colors.INDIGO_50
-                # se pone un tope a los grupos posibles
-                b.color_true = self.lista_colores_activo[grupo % self.__numero_colores ]
-                self.botones_grupo[grupo].bgcolor = self.lista_colores_activo[grupo % self.__numero_colores ]
         self.controls = self.__filas_botones
+        self.botones_grupo = []
+        self.botones_etiquetas = []
+
+
+        for grupo in grupos:
+            # print(grupo, type(grupo))
+            lista_tags = tags_grupo[grupo]
+            indice_color = int(grupo) % self.__numero_colores 
+            self.agregar_linea_dataset(
+                lista_tags=lista_tags, 
+                indice_grupo=int(grupo), 
+                indice_color=indice_color,
+                boton_grupo_visible=botones_grupo_visibles)
+
+
         self.update()
         self.evento_click()
+
+
+    def agregar_linea_dataset(self, 
+        lista_tags: list,
+        indice_grupo: int,
+        indice_color: int=0, 
+        boton_grupo_visible=True
+        ):
+        """
+        El componente crea un 'grupo' de etiquetas con sus botones de activacion de la interfaz gráfica y los agrega al componente.
+        Permite dejar los botones de grupo ocultos.
+        """
+        g = BotonGrupo()
+        g.data = indice_grupo        # indice grupo
+        g.on_click = self.conmutar_grupo    # evento
+        g.visible = boton_grupo_visible
+        g.bgcolor = self.lista_colores_activo[indice_color]
+        # lista para acceso
+        self.botones_grupo.append(g)
+        # colocacion al comienzo de cada fila de botones
+        filas_botones = ft.Row(
+            controls = [g],
+            wrap = True,
+            )
+        for tag in lista_tags:
+        # creacion de boton (puede estar repetido)
+            b = BotonBiestable(tag)
+            self.botones_etiquetas.append(b)
+            filas_botones.controls.append(b)
+            # asignacion color
+            b.color_false = self.lista_colores_pasivo[indice_color]
+            b.color_true = self.lista_colores_activo[indice_color]
+
+        self.__filas_botones.append(filas_botones)
 
 
     def guardar_dataset(self, etiquetas: Etiquetas, sobreescribir=False):
@@ -238,3 +270,15 @@ class FilasBotonesEtiquetas(ft.Column):
 
 
 
+
+if __name__=="__main__":
+
+    def main(pagina: ft.Page):
+
+        filas_demo = FilasBotonesEtiquetas()
+        pagina.add(filas_demo)
+
+        pagina.update()
+
+
+    ft.app(target=main)       
