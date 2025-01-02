@@ -23,21 +23,8 @@ from componentes.galeria_estados import actualizar_estilo_estado
 from componentes.clasificador_estados import filtrar_dimensiones, filtrar_etiquetas
 from componentes.dialogo_alerta import DialogoAlerta
 
-from vistas.etiquetador.dialogos import dialogo_dataset, dialogo_directorio, dialogo_guardado_tags
-from vistas.etiquetador.columna_etiquetas import entrada_tags_agregar,entrada_tags_quitar
-from vistas.etiquetador.columna_etiquetas import entrada_tags_buscar
-from vistas.etiquetador.columna_etiquetas import filas_filtrado, columna_etiquetas, texto_contador_tags
-from vistas.etiquetador.columna_etiquetas import boton_reset_tags, boton_guardar_dataset, boton_reordenar_tags
-from vistas.etiquetador.columna_etiquetas import estadisticas
-from vistas.etiquetador.columna_seleccion import texto_imagen, texto_ruta_data,texto_ruta_titulo,texto_tags_data,texto_tags_titulo
-from vistas.etiquetador.columna_seleccion import columna_seleccion, contenedor_seleccion
-from vistas.etiquetador.columna_seleccion import imagen_seleccion
-from vistas.etiquetador.clasificador import clasificador_imagenes
-from vistas.etiquetador.menu_etiquetador import boton_carpeta, boton_dataset, tooltip_carpeta, ayuda_emergente
-from vistas.etiquetador.menu_etiquetador import fila_controles, lista_estados_desplegable
-from vistas.etiquetador.menu_etiquetador import actualizar_lista_dimensiones
-from vistas.etiquetador.columna_etiquetador import etiquetador_imagen, crear_botones_etiquetador
-from vistas.etiquetador.columna_galeria import galeria_etiquetador
+
+from vistas.etiquetador import *
 
 
 def claves_etiquetas(
@@ -148,11 +135,13 @@ def main(pagina: ft.Page):
 
     def buscar_tags_seleccion(e):
 
-        texto = entrada_tags_buscar.value
+        # texto = entrada_tags_buscar.value # FIX
         # actualizacion de las etiquetas encontradas
         estadisticas()
         filas_filtrado.evento_click(filtrar_todas_etiquetas)
         columna_etiquetas.update()
+        texto = entrada_tags_buscar.value
+
 
 
     def agregar_tags_seleccion(e):
@@ -494,8 +483,6 @@ def main(pagina: ft.Page):
             if indice == None:
                 print(f"[bold magenta]actualizar_componentes")
                 print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]no disponible en galeria")
-                # clave_actual = galeria_etiquetador.imagenes_mostradas[0].clave
-                # clave_actual = galeria_etiquetador.controls[0].clave
                 clave_actual = imagenes_mostradas[0].clave
                 print(f"[bold magenta]Imagen '[bold yellow]{clave_actual}' [bold magenta]como sustituto\n")
 
