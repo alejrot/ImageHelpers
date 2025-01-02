@@ -18,7 +18,7 @@ class FilasBotonesEtiquetas(ft.Column):
         self.botones_etiquetas = []
         self.botones_grupo = []
         self.__filas_botones = []
-        self.__numero_grupos = 0
+        # self.__numero_grupos = 0
         self.__numero_colores = 0
         self.lista_colores_activo = [
             ft.colors.PURPLE_800,      
@@ -66,7 +66,7 @@ class FilasBotonesEtiquetas(ft.Column):
         grupos = list(set(self.dataset.grupos))
 
         # conteo grupos de etiquetas
-        self.__numero_grupos = len(grupos)
+        # self.__numero_grupos = len(grupos)
         self.__numero_colores = len(self.lista_colores_activo)  
 
         # ordenamiento de los tags en filas por grupo
@@ -105,7 +105,7 @@ class FilasBotonesEtiquetas(ft.Column):
 
 
     def agregar_linea_dataset(self, 
-        lista_tags: list,
+        lista_tags: list[str],
         indice_grupo: int,
         indice_color: int=0, 
         boton_grupo_visible=True

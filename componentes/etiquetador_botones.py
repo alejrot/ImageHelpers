@@ -1,8 +1,6 @@
 from rich import print as print
 import flet as ft
-from manejo_texto.procesar_etiquetas import  Etiquetas
-
-
+from manejo_texto.procesar_etiquetas import  Etiquetas, separar_etiquetas
 from componentes.botones import BotonBiestable, BotonGrupo
 from componentes.filas_botones import FilasBotonesEtiquetas
 
@@ -23,8 +21,9 @@ class EtiquetadorBotones(ft.Column):
         # campos de entrada de texto
         self.__entrada_texto = ft.TextField(
             label="Agregar nuevos tags al etiquetador - pulsar 'ENTER' para confirmar",
-            # on_change=,
-            # on_submit=,
+            on_change=None,
+            on_submit=self.agregar_tags_texto,
+            focused_border_color=ft.colors.BLUE_700,
             height=60,
             width=500,
             )
@@ -92,8 +91,8 @@ class EtiquetadorBotones(ft.Column):
             width = 600,
             )  
         self.controls=[
+            self.__fila_texto, 
             self.__filas_botones,
-            # self.__fila_texto, 
             self.__divisor, 
             self.__f1, 
             self.__f2,
@@ -183,6 +182,24 @@ class EtiquetadorBotones(ft.Column):
             self.restablecer_etiquetas( "e")
 
 
+    def agregar_linea_dataset(self, tags: list[str], boton_grupo_visible=True):
+        """Agrega etiquetas al dataset y a si corresponde.
+        Permite dejar el boton de grupo ocultos."""
+        n = len(self.__filas_botones.botones_grupo) 
+        colores = len(self.__filas_botones.lista_colores_activo)
+        self.__filas_botones.agregar_linea_dataset(
+            lista_tags = tags,
+            indice_grupo = n,
+            indice_color = (n % colores),
+            boton_grupo_visible=boton_grupo_visible
+            )
+
+    @property
+    def entrada_texto(self):
+        """AUXILIAR - QUIZA SEA ELIMINADO MAS ADELANTE"""
+        return self.__entrada_texto     # FIX
+
+
     def guardar_dataset(self, etiquetas: Etiquetas, sobreescribir=False):
         """Añade o sobreescribe las etiquetas del archivo de dataset"""
         guardado_exitoso = self.__filas_botones.guardar_dataset(etiquetas, sobreescribir)
@@ -260,6 +277,21 @@ class EtiquetadorBotones(ft.Column):
         self.__filas_botones.update()
         # self.scroll_to(key=clave)
 
+
+    def agregar_tags_texto(self, e):
+        """Permite el agregado manual de etiquetas desde la entrada de texto."""
+        # texto = entrada_tags_agregar.value
+        texto = self.__entrada_texto.value
+        # conversion a lista de etiquetas
+        texto = separar_etiquetas([texto]).keys()
+        texto = list(texto)
+        # descarte de entradas vacias
+        if len(texto)== 0:
+            return
+
+        self.agregar_linea_dataset(texto)
+        self.__entrada_texto.value = ""
+        self.update()
 
 
 ################## EJECUCION DEMO ###################
